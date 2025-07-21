@@ -1,7 +1,3 @@
---  Creación y uso de la Base de Datos
-DROP DATABASE IF EXISTS taller_mecanico_db; -- 
-CREATE DATABASE taller_mecanico_db;
-USE taller_mecanico_db;
 
 -- =================================================================================================
 -- CREACIÓN DE TABLAS
@@ -87,13 +83,11 @@ INSERT INTO JC_Contadores (tabla_nombre, ultimo_id) VALUES
 ('JC_Repuestos', 0),
 ('JC_Ordenes_Trabajo', 0),
 ('JC_Detalle_Orden', 0);
-
 -- =================================================================================================
 -- TRIGGERS
 -- =================================================================================================
 
 -- Trigger para generar PK de Clientes
-DELIMITER $$
 CREATE TRIGGER JC_TRG_Before_Insert_Cliente
 BEFORE INSERT ON JC_Clientes
 FOR EACH ROW
@@ -102,11 +96,8 @@ BEGIN
     UPDATE JC_Contadores SET ultimo_id = ultimo_id + 1 WHERE tabla_nombre = 'JC_Clientes';
     SELECT ultimo_id INTO next_id FROM JC_Contadores WHERE tabla_nombre = 'JC_Clientes';
     SET NEW.id = next_id;
-END$$
-DELIMITER ;
-
+END;
 -- Trigger para generar PK de Vehículos
-DELIMITER $$
 CREATE TRIGGER JC_TRG_Before_Insert_Vehiculo
 BEFORE INSERT ON JC_Vehiculos
 FOR EACH ROW
@@ -115,11 +106,8 @@ BEGIN
     UPDATE JC_Contadores SET ultimo_id = ultimo_id + 1 WHERE tabla_nombre = 'JC_Vehiculos';
     SELECT ultimo_id INTO next_id FROM JC_Contadores WHERE tabla_nombre = 'JC_Vehiculos';
     SET NEW.id = next_id;
-END$$
-DELIMITER ;
-
+END;
 -- Trigger para generar PK de Repuestos
-DELIMITER $$
 CREATE TRIGGER JC_TRG_Before_Insert_Repuesto
 BEFORE INSERT ON JC_Repuestos
 FOR EACH ROW
@@ -128,11 +116,8 @@ BEGIN
     UPDATE JC_Contadores SET ultimo_id = ultimo_id + 1 WHERE tabla_nombre = 'JC_Repuestos';
     SELECT ultimo_id INTO next_id FROM JC_Contadores WHERE tabla_nombre = 'JC_Repuestos';
     SET NEW.id = next_id;
-END$$
-DELIMITER ;
-
+END;
 -- Trigger para generar PK de Órdenes de Trabajo
-DELIMITER $$
 CREATE TRIGGER JC_TRG_Before_Insert_Orden
 BEFORE INSERT ON JC_Ordenes_Trabajo
 FOR EACH ROW
@@ -141,11 +126,8 @@ BEGIN
     UPDATE JC_Contadores SET ultimo_id = ultimo_id + 1 WHERE tabla_nombre = 'JC_Ordenes_Trabajo';
     SELECT ultimo_id INTO next_id FROM JC_Contadores WHERE tabla_nombre = 'JC_Ordenes_Trabajo';
     SET NEW.id = next_id;
-END$$
-DELIMITER ;
-
+END;
 -- Trigger para generar PK de Detalle de Orden
-DELIMITER $$
 CREATE TRIGGER JC_TRG_Before_Insert_Detalle_Orden
 BEFORE INSERT ON JC_Detalle_Orden
 FOR EACH ROW
@@ -154,12 +136,8 @@ BEGIN
     UPDATE JC_Contadores SET ultimo_id = ultimo_id + 1 WHERE tabla_nombre = 'JC_Detalle_Orden';
     SELECT ultimo_id INTO next_id FROM JC_Contadores WHERE tabla_nombre = 'JC_Detalle_Orden';
     SET NEW.id = next_id;
-END$$
-DELIMITER ;
-
-
+END;
 -- Trigger para reducir el stock de repuestos automáticamente
-DELIMITER $$
 CREATE TRIGGER JC_TRG_After_Insert_Detalle_Stock
 AFTER INSERT ON JC_Detalle_Orden
 FOR EACH ROW
@@ -167,16 +145,12 @@ BEGIN
     UPDATE JC_Repuestos
     SET stock = stock - NEW.cantidad
     WHERE id = NEW.repuesto_id;
-END$$
-DELIMITER ;
-
-
+END;
 -- =================================================================================================
 -- FUNCIONES
 -- =================================================================================================
 
 -- Función para generar el correo electrónico del cliente
-DELIMITER $$
 CREATE FUNCTION JC_FN_GenerarCorreo(
     p_nombres VARCHAR(100),
     p_apellidos VARCHAR(100)
@@ -202,12 +176,8 @@ BEGIN
     END WHILE;
 
     RETURN correo_final;
-END$$
-DELIMITER ;
-
-
+END;
 -- Función para calcular el total de una orden de trabajo
-DELIMITER $$
 CREATE FUNCTION JC_FN_CalcularTotalOrden(
     p_orden_id INT
 )
@@ -223,17 +193,13 @@ BEGIN
     WHERE orden_id = p_orden_id;
 
     RETURN IFNULL(total, 0.00);
-END$$
-DELIMITER ;
-
-
+END;
 -- =================================================================================================
 -- PROCEDIMIENTOS ALMACENADOS
 -- =================================================================================================
 
 -- --- Procedimientos para Clientes ---
 
-DELIMITER $$
 CREATE PROCEDURE JC_InsertarCliente(
     IN p_run VARCHAR(12),
     IN p_nombres VARCHAR(100),
@@ -247,11 +213,7 @@ BEGIN
     INSERT INTO JC_Clientes (run, nombres, apellidos, telefono, correo, direccion)
     VALUES (p_run, p_nombres, p_apellidos, p_telefono, v_correo, p_direccion);
     SELECT * FROM JC_Clientes WHERE correo = v_correo;
-END$$
-DELIMITER ;
-
-
-DELIMITER $$
+END;
 CREATE PROCEDURE JC_ActualizarCliente(
     IN p_id INT,
     IN p_nombres VARCHAR(100),
@@ -266,22 +228,15 @@ BEGIN
         telefono = p_telefono,
         direccion = p_direccion
     WHERE id = p_id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
+END;
 CREATE PROCEDURE JC_EliminarCliente(
     IN p_id INT
 )
 BEGIN
     DELETE FROM JC_Clientes WHERE id = p_id;
-END$$
-DELIMITER ;
-
-
+END;
 -- --- Procedimientos para Vehículos ---
 
-DELIMITER $$
 CREATE PROCEDURE JC_InsertarVehiculo(
     IN p_patente VARCHAR(10),
     IN p_marca VARCHAR(50),
@@ -295,10 +250,7 @@ BEGIN
     INSERT INTO JC_Vehiculos (patente, marca, modelo, año, tipo, cliente_id)
     VALUES (UPPER(p_patente), p_marca, p_modelo, p_año, p_tipo, p_cliente_id);
     SELECT * FROM JC_Vehiculos WHERE patente = UPPER(p_patente);
-END$$
-DELIMITER ;
-
-DELIMITER $$
+END;
 CREATE PROCEDURE JC_ActualizarVehiculo(
     IN p_id INT,
     IN p_marca VARCHAR(50),
@@ -314,22 +266,15 @@ BEGIN
         año = p_año,
         tipo = p_tipo
     WHERE id = p_id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
+END;
 CREATE PROCEDURE JC_EliminarVehiculo(
     IN p_id INT
 )
 BEGIN
     DELETE FROM JC_Vehiculos WHERE id = p_id;
-END$$
-DELIMITER ;
-
-
+END;
 -- --- Procedimientos para Repuestos ---
 
-DELIMITER $$
 CREATE PROCEDURE JC_InsertarRepuesto(
     IN p_nombre VARCHAR(100),
     IN p_categoria VARCHAR(100),
@@ -339,10 +284,7 @@ CREATE PROCEDURE JC_InsertarRepuesto(
 BEGIN
     INSERT INTO JC_Repuestos (nombre, categoria, precio, stock)
     VALUES (p_nombre, p_categoria, p_precio, p_stock);
-END$$
-DELIMITER ;
-
-DELIMITER $$
+END;
 CREATE PROCEDURE JC_ActualizarRepuesto(
     IN p_id INT,
     IN p_nombre VARCHAR(100),
@@ -357,22 +299,15 @@ BEGIN
         precio = p_precio,
         stock = p_stock
     WHERE id = p_id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
+END;
 CREATE PROCEDURE JC_EliminarRepuesto(
     IN p_id INT
 )
 BEGIN
     DELETE FROM JC_Repuestos WHERE id = p_id;
-END$$
-DELIMITER ;
-
-
+END;
 -- --- Procedimientos para Órdenes de Trabajo ---
 
-DELIMITER $$
 CREATE PROCEDURE JC_CrearOrdenTrabajo(
     IN p_cliente_id INT,
     IN p_vehiculo_id INT
@@ -381,10 +316,7 @@ BEGIN
     INSERT INTO JC_Ordenes_Trabajo (cliente_id, vehiculo_id, fecha_hora)
     VALUES (p_cliente_id, p_vehiculo_id, NOW());
     SELECT * FROM JC_Ordenes_Trabajo WHERE id = (SELECT ultimo_id FROM JC_Contadores WHERE tabla_nombre = 'JC_Ordenes_Trabajo');
-END$$
-DELIMITER ;
-
-DELIMITER $$
+END;
 CREATE PROCEDURE JC_AgregarDetalleOrden(
     IN p_orden_id INT,
     IN p_repuesto_id INT,
@@ -402,10 +334,7 @@ BEGIN
     UPDATE JC_Ordenes_Trabajo
     SET monto_total = JC_FN_CalcularTotalOrden(p_orden_id)
     WHERE id = p_orden_id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
+END;
 CREATE PROCEDURE JC_ActualizarEstadoOrden(
     IN p_orden_id INT,
     IN p_estado ENUM('pendiente', 'en proceso', 'finalizada')
@@ -414,9 +343,7 @@ BEGIN
     UPDATE JC_Ordenes_Trabajo
     SET estado = p_estado
     WHERE id = p_orden_id;
-END$$
-DELIMITER ;
-
+END;
 -- =================================================================================================
 -- SCRIPT FINALIZADO
 -- =================================================================================================
